@@ -1,4 +1,8 @@
 """Application constants."""
+import pathlib
+
+ROOT = pathlib.Path(__file__).resolve().parent
+
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 FRAMERATE = 60

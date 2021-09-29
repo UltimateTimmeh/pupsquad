@@ -20,3 +20,8 @@ python3 -m pip install -e .
 ## Usage
 
 To run the game, execute command `pupsquad` in a terminal.
+
+## Credits
+
+* Programming: Tim Dezutter (dezutter.tim@gmail.com)
+* Player Model: Pixel Wolf by Alizard (https://opengameart.org/content/pixel-wolf)

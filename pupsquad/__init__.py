@@ -1,7 +1,4 @@
 """Pup Squad: A totally-not-Paw-Patrol platformer for kids."""
-import abc
-import datetime
-
 import numpy as np
 import pygame
 
@@ -9,10 +6,14 @@ from pupsquad import decor
 from pupsquad import entity
 from pupsquad import scene
 from pupsquad.constant import METERS
+from pupsquad.constant import SCREEN_WIDTH
+from pupsquad.constant import SCREEN_HEIGHT
 
 
 def main():
     """Main execution function for running the application."""
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # Settings for the first level.
     # In time this should all be replaced by a file that is read and parsed
     # entirely by the 'Level' class.
@@ -55,7 +56,7 @@ def main():
     level_decor = decor.Decor(grid)
     level = scene.Level(player, level_decor)
     game = scene.SceneContext(level)
-    game.run()
+    game.run(screen)
 
 
 if __name__ == "__main__":
