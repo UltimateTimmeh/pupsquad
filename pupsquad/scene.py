@@ -4,8 +4,6 @@ import datetime
 
 import pygame
 
-from pupsquad.constant import SCREEN_WIDTH
-from pupsquad.constant import SCREEN_HEIGHT
 from pupsquad.constant import FRAMERATE
 
 
@@ -23,11 +21,9 @@ class SceneContext:
         self._scene = scene
         self._scene.context = self
 
-    def run(self):
+    def run(self, screen):
         """Run the game."""
-        # Initialize the screen object and frame rate clock.
-        pygame.init()
-        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Initialize the frame rate clock.
         clock = pygame.time.Clock()
 
         # Main game loop.
@@ -45,7 +41,7 @@ class SceneContext:
             clock.tick(FRAMERATE)
 
 
-class AbstractScene(abc.ABC):
+class Scene(abc.ABC):
     """Abstract base class for a game scene."""
 
     @property
@@ -69,7 +65,7 @@ class AbstractScene(abc.ABC):
         pass
 
 
-class Level(AbstractScene):
+class Level(Scene):
     """A game level."""
 
     def __init__(self, player, decor):
