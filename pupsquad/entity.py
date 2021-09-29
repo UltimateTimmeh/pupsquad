@@ -1,4 +1,4 @@
-"""All entities in the game, i.e. the player, enemies and collectibles."""
+"""Base classes for all entities in the game, i.e. player, enemies and other."""
 import abc
 
 import numpy as np
@@ -9,27 +9,48 @@ from pupsquad.constant import METERS
 from pupsquad.constant import ROOT
 
 
-class Character(pygame.sprite.Sprite, abc.ABC):
-    """Abstract base class for characters."""
+class Entity(pygame.sprite.Sprite, abc.ABC):
+    """Base class for entities, i.e. characters and objects."""
 
-    def __init__(self, mass, position):
+    def __init__(self, position, initial_image_state):
         super().__init__()
 
         # Initial entity state.
-        self.mass = mass
         self.position = position
+
+        # Entity image.
+        self.image_context = EntityImageContext(initial_image_state)
+        self.image = self.image_context.image
+        self.rect = self.image.get_rect()
+        self.rect.center = self.position
+
+    @abc.abstractmethod
+    def update(self, time_delta, decor):
+        """Update the entity state."""
+        # Update the entity image state.
+        self.image_context.update(self)
+        self.image = self.image_context.image
+        self.rect = self.image.get_rect()
+        self.rect.center = self.position
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+class Character(Entity):
+    """Base class for characters, i.e. the player and enemies."""
+
+    def __init__(self, position, initial_image_state, mass):
+        super().__init__(position, initial_image_state)
+
+        # Initial entity state.
+        self.mass = mass
         self.velocity = np.array([0.*METERS, 0.*METERS])
         self.force = np.array([0., 0.])
         self.jumping = False
 
-        # Entity sprite.
-        self.image = pygame.Surface((1*METERS, 1*METERS))
-        self.image.fill(pygame.Color("red"))
-        self.rect = self.image.get_rect()
-        self.rect.midbottom = self.position
-
     def update(self, time_delta, decor):
-        """Update the entity state."""
+        """Update the character state."""
         # Calculate position delta.
         acceleration = self.force/self.mass - [0., GRAVITY]
         self.velocity += acceleration*time_delta
@@ -53,92 +74,35 @@ class Character(pygame.sprite.Sprite, abc.ABC):
                 self.velocity[1] = 0.
         # Update the position.
         self.position += position_delta
-        self.rect.midbottom = self.position
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
-
-class Player(Character):
-    """The player character."""
-
-    def __init__(self, position):
-        # General entity settings.
-        mass = 35.
-        super().__init__(mass, position)
-        # Player-specific settings.
-        self.run_speed = 4.*METERS
-        self.jump_height = 1.5*METERS
-        # Player model.
-        self.model = CharacterModelContext(PlayerIdleRight())
-
-    def handle_event(self, event):
-        """Handle an event."""
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                self.jump()
-            elif event.key == pygame.K_a:
-                self.start_run_left()
-            elif event.key == pygame.K_d:
-                self.start_run_right()
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_a:
-                self.stop_run_left()
-            elif event.key == pygame.K_d:
-                self.stop_run_right()
-
-    def update(self, time_delta, decor):
+        self.rect.center = self.position
+        # Update the character image state.
         super().update(time_delta, decor)
-        # Update current image depending on movement.
-        self.model.update(self)
-        self.image = self.model.image
-        self.rect = self.image.get_rect()
-        self.rect.midbottom = self.position
-
-    def jump(self):
-        if self.jumping:
-            return
-        jump_velocity = (2*GRAVITY*self.jump_height)**0.5
-        self.velocity[1] += jump_velocity
-        self.jumping = True
-
-    def start_run_left(self):
-        self.velocity[0] -= self.run_speed
-
-    def stop_run_left(self):
-        self.velocity[0] += self.run_speed
-
-    def start_run_right(self):
-        self.velocity[0] += self.run_speed
-
-    def stop_run_right(self):
-        self.velocity[0] -= self.run_speed
 
 
-class CharacterModelContext:
-    """The character model context class."""
+class EntityImageContext:
+    """The entity image context class."""
 
-    _model = None
-    """The current model of the character."""
+    _state = None
+    """The current entity image state."""
 
-    def __init__(self, model):
-        self.transition_to(model)
+    def __init__(self, state):
+        self.transition_to(state)
 
     @property
     def image(self):
-        return self._model.image
+        return self._state.image
 
-    def transition_to(self, model):
-        """Transition to another model."""
-        self._model = model
-        self._model.context = self
+    def transition_to(self, state):
+        """Transition to another image state."""
+        self._state = state
+        self._state.context = self
 
-    def update(self, *args, **kwargs):
-        self._model.update(*args, **kwargs)
+    def update(self, entity):
+        self._state.update(entity)
 
 
-class CharacterModel(abc.ABC):
-    """Abstract base class for character models."""
+class EntityImageState(abc.ABC):
+    """Abstract base class for entity image states."""
 
     def __init__(self, image_fps, width, height, flip, delay):
         self.images = []
@@ -166,201 +130,7 @@ class CharacterModel(abc.ABC):
         return self.images[self.index]
 
     @abc.abstractmethod
-    def update(self, character):
+    def update(self, entity):
         self.counter = (self.counter+1) % self.delay
         if self.counter == 0:
             self.index = (self.index+1) % len(self.images)
-
-
-class PlayerIdleRight(CharacterModel):
-    """Player idle, facing right."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/idle/1.png",
-            "assets/player/idle/2.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] < -0.5*METERS:
-            self.context.transition_to(PlayerFallRight())
-        elif character.velocity[1] > 0:
-            self.context.transition_to(PlayerJumpRight())
-        elif character.velocity[0] < 0:
-            self.context.transition_to(PlayerRunLeft())
-        elif character.velocity[0] > 0:
-            self.context.transition_to(PlayerRunRight())
-
-
-class PlayerIdleLeft(CharacterModel):
-    """Player idle, facing left."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/idle/1.png",
-            "assets/player/idle/2.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] < -0.5*METERS:
-            self.context.transition_to(PlayerFallLeft())
-        elif character.velocity[1] > 0:
-            self.context.transition_to(PlayerJumpLeft())
-        elif character.velocity[0] < 0:
-            self.context.transition_to(PlayerRunLeft())
-        elif character.velocity[0] > 0:
-            self.context.transition_to(PlayerRunRight())
-
-
-class PlayerRunRight(CharacterModel):
-    """Player running, facing right."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/run/1.png",
-            "assets/player/run/2.png",
-            "assets/player/run/3.png",
-            "assets/player/run/4.png",
-            "assets/player/run/5.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 5
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] < -0.5*METERS:
-            self.context.transition_to(PlayerFallRight())
-        elif character.velocity[1] > 0:
-            self.context.transition_to(PlayerJumpRight())
-        elif character.velocity[0] < 0:
-            self.context.transition_to(PlayerRunLeft())
-        elif character.velocity[0] == 0:
-            self.context.transition_to(PlayerIdleRight())
-
-
-class PlayerRunLeft(CharacterModel):
-    """Player running, facing left."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/run/1.png",
-            "assets/player/run/2.png",
-            "assets/player/run/3.png",
-            "assets/player/run/4.png",
-            "assets/player/run/5.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 5
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] < -0.5*METERS:
-            self.context.transition_to(PlayerFallLeft())
-        elif character.velocity[1] > 0:
-            self.context.transition_to(PlayerJumpLeft())
-        elif character.velocity[0] > 0:
-            self.context.transition_to(PlayerRunRight())
-        elif character.velocity[0] == 0:
-            self.context.transition_to(PlayerIdleLeft())
-
-
-class PlayerJumpRight(CharacterModel):
-    """Player jumping, facing right."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/jump/1.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] < 0.:
-            self.context.transition_to(PlayerFallRight())
-        elif character.velocity[0] < 0.:
-            self.context.transition_to(PlayerJumpLeft())
-
-
-class PlayerJumpLeft(CharacterModel):
-    """Player jumping, facing left."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/jump/1.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] < 0.:
-            self.context.transition_to(PlayerFallLeft())
-        elif character.velocity[0] > 0.:
-            self.context.transition_to(PlayerJumpRight())
-
-
-class PlayerFallRight(CharacterModel):
-    """Player falling, facing right."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/fall/1.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] == 0:
-            self.context.transition_to(PlayerIdleRight())
-        elif character.velocity[0] < 0.:
-            self.context.transition_to(PlayerFallLeft())
-
-
-class PlayerFallLeft(CharacterModel):
-    """Player falling, facing left."""
-
-    def __init__(self):
-        image_fps = [
-            "assets/player/fall/1.png",
-        ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
-
-    def update(self, character):
-        super().update(character)
-        if character.velocity[1] == 0:
-            self.context.transition_to(PlayerIdleLeft())
-        elif character.velocity[0] > 0.:
-            self.context.transition_to(PlayerFallRight())
