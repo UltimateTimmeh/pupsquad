@@ -2,17 +2,21 @@
 
 A simple platformer for kids. Run, jump, avoid dangers and collect dog cookies.
 
-## Developer instructions
+## Installation
 
-As a developer, you will want to create a virtual environment and install Pup
-Squad before making any changes::
+To install Pup Squad, execute the following commands in a terminal.
 
 ```bash
 git clone https://www.github.com/UltimateTimmeh/pupsquad.git <PUPSQUAD_ROOT>
 cd <PUPSQUAD_ROOT>
 
+# The following two commands are recommended for development purposes only.
 virtualenv -ppython3 .venv
 source .venv/bin/activate
 
-pip install -e .
+python3 -m pip install -e .
 ```
+
+## Usage
+
+To run the game, execute command `pupsquad` in a terminal.
