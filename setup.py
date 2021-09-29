@@ -17,7 +17,12 @@ setuptools.setup(
         "Natural Language :: English",
         "Programming Language :: Python :: 3.7",
     ],
-    description="PupSquad, a platformer for young kids.",
+    description="Pup Squad, a platformer for young kids.",
+    entry_points = {
+              'console_scripts': [
+                  'pupsquad = pupsquad.pupsquad:main',
+              ],
+          },
     install_requires=requirements,
     long_description=readme+"\n",
     include_package_data=True,
