@@ -20,7 +20,7 @@ setuptools.setup(
     description="Pup Squad, a platformer for young kids.",
     entry_points = {
               'console_scripts': [
-                  'pupsquad = pupsquad.pupsquad:main',
+                  'pupsquad = pupsquad:main',
               ],
           },
     install_requires=requirements,
