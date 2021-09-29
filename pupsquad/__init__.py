@@ -20,7 +20,7 @@ def main():
     # entirely by the 'Level' class.
     ## The player.
     player_position = np.array([2.*METERS, 5.8*METERS])
-    player_ = pupsquad.player.Player(player_position)
+    player = pupsquad.player.Player(player_position)
     ## The decor.
     grid = np.array([
             [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
@@ -55,7 +55,7 @@ def main():
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ])
     level_decor = pupsquad.decor.Decor(grid)
-    level = pupsquad.scene.Level(player_, level_decor)
+    level = pupsquad.scene.Level(player, level_decor)
     # Initialize and run the game.
     game = pupsquad.scene.SceneContext(level)
     game.run(screen)
