@@ -1,6 +1,5 @@
 """Game scenes and their context manager."""
 import abc
-import datetime
 
 import pygame
 
@@ -71,20 +70,13 @@ class Level(Scene):
     def __init__(self, player, decor):
         self.player = player
         self.decor = decor
-        self.previous_time = None
 
     def handle_event(self, event):
         self.player.handle_event(event)
 
     def update(self):
         # Calculate the time delta for physics calculations.
-        current_time = datetime.datetime.now()
-        time_delta = 0.
-        if self.previous_time is not None:
-            time_delta = (current_time-self.previous_time).total_seconds()
-        self.previous_time = current_time
-        # Update the entities.
-        self.player.update(time_delta, self.decor)
+        self.player.update(self)
 
     def draw(self, screen):
         screen.fill(pygame.Color("grey"))
