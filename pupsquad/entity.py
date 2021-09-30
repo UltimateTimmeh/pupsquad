@@ -6,6 +6,7 @@ import pygame
 
 from pupsquad.constant import GRAVITY
 from pupsquad.constant import METERS
+from pupsquad.constant import SECONDS_PER_FRAME
 from pupsquad.constant import ROOT
 
 
@@ -25,7 +26,7 @@ class Entity(pygame.sprite.Sprite, abc.ABC):
         self.rect.center = self.position
 
     @abc.abstractmethod
-    def update(self, time_delta, decor):
+    def update(self, level):
         """Update the entity state."""
         # Update the entity image state.
         self.image_context.update(self)
@@ -49,15 +50,15 @@ class Character(Entity):
         self.force = np.array([0., 0.])
         self.jumping = False
 
-    def update(self, time_delta, decor):
+    def update(self, level):
         """Update the character state."""
         # Calculate position delta.
         acceleration = self.force/self.mass - [0., GRAVITY]
-        self.velocity += acceleration*time_delta
-        position_delta = np.round(self.velocity*time_delta)
+        self.velocity += acceleration*SECONDS_PER_FRAME
+        position_delta = np.round(self.velocity*SECONDS_PER_FRAME)
         position_delta *= np.array([1, -1])
         # Check for collision with impassable decor.
-        for tile in decor.tiles:
+        for tile in level.decor.tiles:
             if tile.passable:
                 continue
             if tile.rect.colliderect(self.rect.move(position_delta[0], 0.)):
@@ -76,7 +77,7 @@ class Character(Entity):
         self.position += position_delta
         self.rect.center = self.position
         # Update the character image state.
-        super().update(time_delta, decor)
+        super().update(level)
 
 
 class EntityImageContext:

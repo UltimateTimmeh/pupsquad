@@ -53,7 +53,16 @@ class Player(pupsquad.entity.Character):
         self.velocity[0] -= self.run_speed
 
 
-class PlayerIdleRight(pupsquad.entity.EntityImageState):
+class PlayerImageState(pupsquad.entity.EntityImageState):
+    """Base class for player image states."""
+
+    def __init__(self, image_fps, flip=True, delay=10):
+        width = 1.15*METERS
+        height = 0.74*METERS
+        super().__init__(image_fps, width, height, flip, delay)
+
+
+class PlayerIdleRight(PlayerImageState):
     """Image state for player idle, facing right."""
 
     def __init__(self):
@@ -61,11 +70,7 @@ class PlayerIdleRight(pupsquad.entity.EntityImageState):
             "assets/player/idle/1.png",
             "assets/player/idle/2.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps)
 
     def update(self, entity):
         super().update(entity)
@@ -79,7 +84,7 @@ class PlayerIdleRight(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerRunRight())
 
 
-class PlayerIdleLeft(pupsquad.entity.EntityImageState):
+class PlayerIdleLeft(PlayerImageState):
     """Image state for player idle, facing left."""
 
     def __init__(self):
@@ -87,11 +92,7 @@ class PlayerIdleLeft(pupsquad.entity.EntityImageState):
             "assets/player/idle/1.png",
             "assets/player/idle/2.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps, flip=False)
 
     def update(self, entity):
         super().update(entity)
@@ -105,7 +106,7 @@ class PlayerIdleLeft(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerRunRight())
 
 
-class PlayerRunRight(pupsquad.entity.EntityImageState):
+class PlayerRunRight(PlayerImageState):
     """Image state for player running, facing right."""
 
     def __init__(self):
@@ -116,11 +117,7 @@ class PlayerRunRight(pupsquad.entity.EntityImageState):
             "assets/player/run/4.png",
             "assets/player/run/5.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 5
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps, delay=5)
 
     def update(self, entity):
         super().update(entity)
@@ -134,7 +131,7 @@ class PlayerRunRight(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerIdleRight())
 
 
-class PlayerRunLeft(pupsquad.entity.EntityImageState):
+class PlayerRunLeft(PlayerImageState):
     """Image state for player running, facing left."""
 
     def __init__(self):
@@ -145,11 +142,7 @@ class PlayerRunLeft(pupsquad.entity.EntityImageState):
             "assets/player/run/4.png",
             "assets/player/run/5.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 5
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps, flip=False, delay=5)
 
     def update(self, entity):
         super().update(entity)
@@ -163,18 +156,14 @@ class PlayerRunLeft(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerIdleLeft())
 
 
-class PlayerJumpRight(pupsquad.entity.EntityImageState):
+class PlayerJumpRight(PlayerImageState):
     """Image state for player jumping, facing right."""
 
     def __init__(self):
         image_fps = [
             "assets/player/jump/1.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps)
 
     def update(self, entity):
         super().update(entity)
@@ -184,18 +173,14 @@ class PlayerJumpRight(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerJumpLeft())
 
 
-class PlayerJumpLeft(pupsquad.entity.EntityImageState):
+class PlayerJumpLeft(PlayerImageState):
     """Image state for player jumping, facing left."""
 
     def __init__(self):
         image_fps = [
             "assets/player/jump/1.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps, flip=False)
 
     def update(self, entity):
         super().update(entity)
@@ -205,18 +190,14 @@ class PlayerJumpLeft(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerJumpRight())
 
 
-class PlayerFallRight(pupsquad.entity.EntityImageState):
+class PlayerFallRight(PlayerImageState):
     """Image state for player falling, facing right."""
 
     def __init__(self):
         image_fps = [
             "assets/player/fall/1.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = True
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps)
 
     def update(self, entity):
         super().update(entity)
@@ -226,18 +207,14 @@ class PlayerFallRight(pupsquad.entity.EntityImageState):
             self.context.transition_to(PlayerFallLeft())
 
 
-class PlayerFallLeft(pupsquad.entity.EntityImageState):
+class PlayerFallLeft(PlayerImageState):
     """Image state for player falling, facing left."""
 
     def __init__(self):
         image_fps = [
             "assets/player/fall/1.png",
         ]
-        width = 1.15*METERS
-        height = 0.74*METERS
-        flip = False
-        delay = 10
-        super().__init__(image_fps, width, height, flip, delay)
+        super().__init__(image_fps, flip=False)
 
     def update(self, entity):
         super().update(entity)
